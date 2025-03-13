@@ -1,0 +1,38 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "contact" : {
+      "email" : "support@launchblock.gg",
+      "name" : "Customer Support"
+    },
+    "description" : "Template description\n",
+    "title" : "Template",
+    "version" : "1.0.0-SNAPSHOT"
+  },
+  "servers" : [ {
+    "url" : "https://template.postsuite.{tld}",
+    "variables" : {
+      "tld" : {
+        "default" : "com"
+      }
+    }
+  } ],
+  "security" : [ {
+    "user-token" : [ ]
+  } ],
+  "externalDocs" : {
+    "description" : "Template description\n",
+    "url" : "https://<OpenIPALocation>"
+  },
+  "components" : {
+    "securitySchemes" : {
+      "user-token" : {
+        "type" : "apiKey",
+        "description" : "Token for user authentication",
+        "name" : "user-token",
+        "in" : "header"
+      }
+    }
+  },
+  "paths" : { }
+}
