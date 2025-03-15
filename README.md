@@ -1,23 +1,42 @@
-# Quarkus Java Template
+# Public RESTful API
 
-![Template Service](https://i.imgur.com/wTCpksY.png)
+![Public RESTful API](https://i.imgur.com/sW6Z0uN.png)
+
+A public RESTful API to interact with the LaunchBlock services. This allows you to make requests to grab information
+from
+our services about various resources within environments within your workspace, or make operations to affect them.
+
+All endpoints are ran under `https://api.launchblock.gg/`, you must provide an `Authorization` header!
 
 ---
 
-## 📅 Planned Features
+## 🪙 Obtaining an API token
 
-- [x] Pricing log annotation
-- [x] Permission requirement annotation
-- [x] User storage in request context
-- [ ] Automated spreading of events to other apps via kafka
+If you are running locally (or outside of LaunchBlock running containers) you must generate an API token. You can
+generate this on [your canvas page](https://canvas.launchblock.gg).
+
+*On your canvas page, within an environment: Click Settings > Tokens > New token: Give this a name and an expiry time.*
+
+![New Token](https://i.imgur.com/wkm5bbG.png)
+
+If you're running within a LaunchBlock container: you can use the `LB_API_TOKEN` environment variable that's
+automatically injected into each container (this also gives access to some extra endpoints, check out the docs!).
+
+---
+
+## 📚 Documentation
+
+We have extensive documentation about the API, you can find this at https://api.launchblock.gg.
+
+If you have further questions around our API, join our [Discord Server](https://discord.gg/LaunchBlock)!
 
 ---
 
 ## ▶️ Running locally
 
-Running locally allows you to quickly test your changes, using the Quarkus framework we can
+Running locally allows you to mock responses and add any additional features you'd like to be exposed.
 
-1. Copy `.env-example` into a file called `.env` and fill in all of the environment vars
+1. Copy `.env-example` into a file called `.env` and fill in all the environment vars
 2. Run `./gradlew quarkusDev` from the gradle quarkus menu to run in dev mode
 
 --- 
@@ -91,17 +110,9 @@ quarkus.profile=dev
 
 1. Caching - we use the `quarkus-caching` library which allows either memory based cache (default) or synced cache on
    redis/other technologies.
-2. Database - we use MongoDB by default, as it's simple and has good support - other CDI supported technologies include
-   MySQL, Postgres and Cassandra.
-
----
-
-## Help & Contacts
-
-Questions can be asked in the **#engineering** Pumble channel for help and support.
-
-- Product Manager: Billy Robinson
-- Engineering Manager: Billy Robinson
+2. Database - we use MongoDB to store API tokens, and it's simple and has good support - other CDI supported
+   technologies include
+   MySQL, Postgres and Cassandra - and we're passively looking at alternatives as we develop this.
 
 ---
 
@@ -119,13 +130,3 @@ Questions can be asked in the **#engineering** Pumble channel for help and suppo
 - Models: Models that are used for requests or responses to get data in or out of the application
 - Repositories: Database repositories that allow entities to be stored in a database
 - User: Utilities and objects related to handling users and the requests they make
-
----
-
-## 🖥️ Deployment
-
-Deployment is automatically handled by [Railway](https://railway.app/) on push to the `stg` or `prod` branches, see
-configuration in `railyway.json`
-
-All database migrations and steps should be automated when being added, if there's not a way to automate these, see the
-`docs/deploy_guides` folder for information on deploying.

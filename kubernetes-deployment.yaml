@@ -1,30 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-template
+  name: api-public
   namespace: launchblock-services
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api-template
+      app: api-public
       namespace: launchblock-services
   template:
     metadata:
       labels:
-        app: api-template
+        app: api-public
         namespace: launchblock-services
     spec:
       imagePullSecrets:
         - name: private-registry-secret
       containers:
         - name: api-template
-          image: private-docker-registry.launchblock.dev/api-auth:latest
+          image: private-docker-registry.launchblock.dev/api-public:latest
           env:
             - name: PORT
               value: "8080"
             - name: AUTH_CLIENT_URL
-              value: "http://api-auth.launchblock-services.svc.cluster.local:8080"
+              value: "http://api-auth"
+            - name: ENVIRONMENTS_CLIENT_URL
+              value: "http://api-envman"
+            - name: LIFECYCLES_CLIENT_URL
+              value: "http://api-envman"
+            - name: PROJECTS_CLIENT_URL
+              value: "http://api-envman"
+            - name: GITHUB_CLIENT_URL
+              value: "http://svc-github"
             - name: MONGODB_CONNECTION_STRING
               value: "mongodb://mongodb.launchblock-services.svc.cluster.local:27017"
             - name: MONGODB_USERNAME
@@ -53,11 +61,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-template
+  name: api-public
   namespace: launchblock-services
 spec:
   selector:
-    app: api-template
+    app: api-public
   ports:
     - protocol: TCP
       port: 80
@@ -67,16 +75,16 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: api-template
+  name: api-public
   namespace: launchblock-services
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`remove-if-private.launchblock.gg`)
+    - match: Host(`api.launchblock.gg`)
       kind: Rule
       services:
-        - name: api-auth
+        - name: api-public
           port: 80
   tls:
     certResolver: letsencrypt

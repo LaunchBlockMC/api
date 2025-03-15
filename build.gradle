@@ -116,8 +116,8 @@ dependencies {
     implementation "io.github.microcks.quarkus:quarkus-microcks:${microcks}"
 }
 
-group = 'gg.launchblock.template'
-version = '1.0.0-SNAPSHOT'
+group = 'gg.launchblock.api'
+version = '0.0.1'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17

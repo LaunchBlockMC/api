@@ -1,0 +1,18 @@
+name: 🛠️ Announce To Discord
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send notification to Discord
+        if: always()
+        uses: SethCohen/github-releases-to-discord@v1.16.2
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          color: "226204225"
+          username: "Rest API"
