@@ -9,7 +9,7 @@ info:
 servers:
 - url: https://api.launchblock.gg
   description: "For usage on local development setups, reference this."
-- url: http://api-public.launchblock-services.cluster.local
+- url: http://api-public.launchblock-services.svc.cluster.local
   description: "For usage inside of LaunchBlock containers, reference this."
 security:
 - Authorization: []
@@ -30,6 +30,57 @@ components:
       name: Authorization
       in: header
   schemas:
+    ContainerResponseModel:
+      type: object
+      properties:
+        identifier:
+          type: string
+        startTimestamp:
+          $ref: "#/components/schemas/Instant"
+        healthy:
+          type: boolean
+        online:
+          type: boolean
+        removing:
+          type: boolean
+        proxyIdentifier:
+          type: string
+    GitCommitResponseModel:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: Commit identifier (hash)
+        username:
+          type: string
+          description: The user who made the commit
+        title:
+          type: string
+          description: The title of the commit
+          examples:
+          - "feat: added a new island to the list of schematics"
+        avatarUrl:
+          type: string
+          description: The avatar URL of the user who made the commit
+        timestamp:
+          $ref: "#/components/schemas/Instant"
+    GitRepositoryResponseModel:
+      type: object
+      properties:
+        link:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+        fullName:
+          type: string
+        isPrivate:
+          type: boolean
+        defaultBranch:
+          type: string
+        username:
+          type: string
     Instant:
       type: string
       format: date-time
@@ -126,6 +177,10 @@ components:
           description: The current stage of the lifecycle
           type: string
           $ref: "#/components/schemas/LifecycleStage"
+        buildLogs:
+          type: string
+        deployLogs:
+          type: string
     LifecycleStage:
       type: string
       enum:
@@ -168,6 +223,34 @@ components:
       - STATIC
       - AUTOSCALE
       - SUMMON
+    Permission:
+      type: string
+      enum:
+      - CONTAINER
+      - VIEW_API_TOKENS
+      - CREATE_API_TOKENS
+      - DELETE_API_TOKENS
+      - CREATE_ENVIRONMENTS
+      - UPDATE_ENVIRONMENTS
+      - VIEW_ENVIRONMENTS
+      - DELETE_ENVIRONMENTS
+      - VIEW_WORKSPACE
+      - VIEW_GITHUB_REPOSITORIES
+      - VIEW_GITHUB_BRANCHES
+      - VIEW_GITHUB_COMMITS
+      - UPDATE_GITHUB_CONNECTION
+      - CREATE_PROJECTS
+      - UPDATE_PROJECTS
+      - DELETE_PROJECTS
+      - CREATE_LIFECYCLE
+      - VIEW_LIFECYCLES
+      - ROLLBACK_LIFECYCLES
+      - VIEW_CONTAINERS
+      - CREATE_CONTAINERS
+      - VIEW_GAME_INSTANCES
+      - CREATE_GAME_INSTANCES
+      - REMOVE_GAME_INSTANCES
+      - UPDATE_GAME_INSTANCES
     PermissionModel:
       type: object
       properties:
@@ -186,6 +269,8 @@ components:
           type: string
     ProjectCreateUpdateRequestModel:
       type: object
+      required:
+      - name
       properties:
         name:
           type: string
@@ -251,6 +336,10 @@ components:
     ProjectResponseModel:
       type: object
       properties:
+        identifier:
+          description: The identifier of the project
+          type: string
+          $ref: "#/components/schemas/UUID"
         name:
           type: string
           description: A name for your project
@@ -330,20 +419,117 @@ components:
             \b\d+(?:\.\d+)?\s*(?:B|Ki|Mi|Gi|Ti|Pi|Ei|Zi|Yi)\b
           examples:
           - 10Gi
+    TokenResponseModel:
+      type: object
+      properties:
+        identifier:
+          $ref: "#/components/schemas/UUID"
+        name:
+          type: string
+        description:
+          type: string
+        workspaceIdentifier:
+          $ref: "#/components/schemas/UUID"
+        environmentIdentifier:
+          $ref: "#/components/schemas/UUID"
+        expiryTimestamp:
+          $ref: "#/components/schemas/Instant"
+        scope:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/Permission"
     UUID:
       type: string
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
 tags:
-- name: API Token Management
-- name: Environments
+- name: API Tokens
+  description: Management and metadata about API tokens
+- name: Containers
+  description: View and manage containers running on a deployment within a project
+- name: GitHub Metadata
+  description: GitHub metadata for repositories linked to the workspace
 - name: Lifecycles
   description: Trigger and get information about builds & deployments for a project
 - name: Permissions
+  description: Permissions that can be awarded to an API token
 - name: Projects
   description: Create and manage projects within an environment
 paths:
-  /permissions/static:
+  /v1/github/branches:
+    get:
+      summary: Get a list of branches on a repository
+      operationId: GitHub.listBranches
+      tags:
+      - GitHub Metadata
+      parameters:
+      - name: repository_url
+        in: query
+        schema:
+          description: A link to the GitHub repository
+          type: string
+          examples:
+          - https://github.com/LaunchBlockMC/example-skywars
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                uniqueItems: true
+                items:
+                  type: string
+  /v1/github/commits:
+    get:
+      summary: Get a list of commits on a branch of a repository
+      operationId: GitHub.listCommits
+      tags:
+      - GitHub Metadata
+      parameters:
+      - name: branch_name
+        in: query
+        schema:
+          description: Name of the branch to find commits on
+          type: string
+          examples:
+          - main
+        required: true
+      - name: repository_url
+        in: query
+        schema:
+          description: A link to the GitHub repository
+          type: string
+          examples:
+          - https://github.com/LaunchBlockMC/example-skywars
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GitCommitResponseModel"
+  /v1/github/repositories:
+    get:
+      summary: Get a list of repositories in a workspace
+      operationId: GitHub.listRepositories
+      tags:
+      - GitHub Metadata
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GitRepositoryResponseModel"
+  /v1/permissions/static:
     get:
       summary: Get a static list of permissions you can add to an API token
       operationId: Permissions.staticList
@@ -359,7 +545,7 @@ paths:
                 uniqueItems: true
                 items:
                   $ref: "#/components/schemas/PermissionModel"
-  /projects:
+  /v1/projects:
     get:
       summary: Get a list of projects within an environment
       operationId: Projects.list
@@ -392,7 +578,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProjectResponseModel"
-  /projects/{identifier}:
+  /v1/projects/{identifier}:
     post:
       summary: Update the details about a project within an environment
       operationId: Projects.update
@@ -449,7 +635,7 @@ paths:
       responses:
         "204":
           description: No Content
-  /projects/{project_identifier}/lifecycles:
+  /v1/projects/{project_identifier}/lifecycles:
     get:
       summary: Get a list of lifecycles in a project
       operationId: Lifecycle.list
@@ -476,7 +662,86 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/LifecycleResponseModel"
-  /projects/{project_identifier}/lifecycles/{identifier}:
+  /v1/projects/{project_identifier}/lifecycles/{deployment_identifier}/containers:
+    get:
+      summary: Get a list of running containers in a deployment
+      operationId: Containers.list
+      tags:
+      - Containers
+      parameters:
+      - name: deployment_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      - name: healthy_only
+        in: query
+        schema:
+          type: boolean
+          default: false
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      - name: online_only
+        in: query
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContainerResponseModel"
+    post:
+      summary: Summon a new container attached to a deployment
+      operationId: Containers.create
+      tags:
+      - Containers
+      parameters:
+      - name: deployment_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContainerResponseModel"
+  /v1/projects/{project_identifier}/lifecycles/{deployment_identifier}/containers/{identifier}:
+    delete:
+      summary: Remove a specified container that is attached to a deployment
+      operationId: Containers.delete
+      tags:
+      - Containers
+      parameters:
+      - name: deployment_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContainerResponseModel"
+  /v1/projects/{project_identifier}/lifecycles/{identifier}:
     delete:
       summary: Rollback a specified lifecycle in a project to the previous successful
         lifecycle
@@ -524,7 +789,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LifecycleResponseModel"
-  /projects/{project_identifier}/lifecycles/{identifier}/configuration:
+  /v1/projects/{project_identifier}/lifecycles/{identifier}/configuration:
     get:
       summary: Get the project configuration attached to a lifecycle
       operationId: Lifecycle.configuration
@@ -548,3 +813,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LifecycleConfigurationResponseModel"
+  /v1/tokens/{identifier}:
+    get:
+      summary: Get details about a specified API token
+      operationId: Tokens.get
+      tags:
+      - API Tokens
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          description: The identifier of the token to view details of
+          type: string
+          examples:
+          - 03e0db3a-3214-496b-b9c8-009dfda30453
+          - '@self'
+          default: '@self'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponseModel"

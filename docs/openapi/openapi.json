@@ -1,524 +1,552 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "contact": {
-      "name": "LaunchBlock Discord Server",
-      "url": "https://discord.gg/LaunchBlock"
+  "openapi" : "3.1.0",
+  "info" : {
+    "contact" : {
+      "name" : "LaunchBlock Discord Server",
+      "url" : "https://discord.gg/LaunchBlock"
     },
-    "title": "Public LaunchBlock API",
-    "version": "0.0.1"
+    "title" : "Public LaunchBlock API",
+    "version" : "0.0.1"
   },
-  "servers": [
-    {
-      "url": "https://api.launchblock.gg",
-      "description": "For usage on local development setups, reference this."
-    },
-    {
-      "url": "http://api-public.launchblock-services.svc.cluster.local",
-      "description": "For usage inside of LaunchBlock containers, reference this."
-    }
-  ],
-  "security": [
-    {
-      "Authorization": []
-    }
-  ],
-  "externalDocs": {
-    "description": "View the LaunchBlock API documentation, tutorials and more!\n",
-    "url": "https://api.launchblock.gg/docs"
+  "servers" : [ {
+    "url" : "https://api.launchblock.gg",
+    "description" : "For usage on local development setups, reference this."
+  }, {
+    "url" : "http://api-public.launchblock-services.svc.cluster.local",
+    "description" : "For usage inside of LaunchBlock containers, reference this."
+  } ],
+  "security" : [ {
+    "Authorization" : [ ]
+  } ],
+  "externalDocs" : {
+    "description" : "View the LaunchBlock API documentation, tutorials and more!\n",
+    "url" : "https://api.launchblock.gg/docs"
   },
-  "components": {
-    "securitySchemes": {
-      "Authorization": {
-        "type": "apiKey",
-        "description": "This API requires authentication to use! This helps us understand identities, permissions and auditing!\n\nTo generate a Token for local usage, go to your canvas, click into an environment and click Settings -> Tokens -> New Token.\n\nIf you're using this API inside of a container, this is automatically generated in the `LB_API_TOKEN` environment variable.\n",
-        "name": "Authorization",
-        "in": "header"
+  "components" : {
+    "securitySchemes" : {
+      "Authorization" : {
+        "type" : "apiKey",
+        "description" : "This API requires authentication to use! This helps us understand identities, permissions and auditing!\n\nTo generate a Token for local usage, go to your canvas, click into an environment and click Settings -> Tokens -> New Token.\n\nIf you're using this API inside of a container, this is automatically generated in the `LB_API_TOKEN` environment variable.\n",
+        "name" : "Authorization",
+        "in" : "header"
       }
     },
-    "schemas": {
-      "Instant": {
-        "type": "string",
-        "format": "date-time",
-        "examples": [
-          "2022-03-10T16:15:50Z"
-        ]
+    "schemas" : {
+      "ContainerResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "type" : "string"
+          },
+          "startTimestamp" : {
+            "$ref" : "#/components/schemas/Instant"
+          },
+          "healthy" : {
+            "type" : "boolean"
+          },
+          "online" : {
+            "type" : "boolean"
+          },
+          "removing" : {
+            "type" : "boolean"
+          },
+          "proxyIdentifier" : {
+            "type" : "string"
+          }
+        }
       },
-      "LifecycleConfigurationResponseModel": {
-        "type": "object",
-        "properties": {
-          "fileDefined": {
-            "type": "boolean",
-            "description": "If the definition was provided in the github config file (.launchblock/config.json)"
+      "GitCommitResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "type" : "string",
+            "description" : "Commit identifier (hash)"
           },
-          "build": {
-            "description": "Information about how to build this project",
-            "type": [
-              "object",
-              "null"
-            ],
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectBuildModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "username" : {
+            "type" : "string",
+            "description" : "The user who made the commit"
           },
-          "deploy": {
-            "description": "Information about how to deploy this project",
-            "type": [
-              "object",
-              "null"
-            ],
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectDeployModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "title" : {
+            "type" : "string",
+            "description" : "The title of the commit",
+            "examples" : [ "feat: added a new island to the list of schematics" ]
           },
-          "restart": {
-            "description": "How to handle restarts or failures in this project",
-            "type": [
-              "object",
-              "null"
-            ],
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectRestartModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "avatarUrl" : {
+            "type" : "string",
+            "description" : "The avatar URL of the user who made the commit"
           },
-          "limits": {
-            "description": "Limits to how much resources your project can use",
-            "type": [
-              "object",
-              "null"
-            ],
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectLimitsModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "timestamp" : {
+            "$ref" : "#/components/schemas/Instant"
+          }
+        }
+      },
+      "GitRepositoryResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "link" : {
+            "type" : "string"
           },
-          "scaling": {
-            "description": "Instructions on how to scale your project",
-            "type": [
-              "object",
-              "null"
-            ],
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectScalingModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "description" : {
+            "type" : "string"
           },
-          "volumes": {
-            "type": [
-              "array",
-              "null"
-            ],
-            "uniqueItems": true,
-            "items": {
-              "$ref": "#/components/schemas/ProjectVolumesModel"
+          "name" : {
+            "type" : "string"
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "isPrivate" : {
+            "type" : "boolean"
+          },
+          "defaultBranch" : {
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Instant" : {
+        "type" : "string",
+        "format" : "date-time",
+        "examples" : [ "2022-03-10T16:15:50Z" ]
+      },
+      "LifecycleConfigurationResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "fileDefined" : {
+            "type" : "boolean",
+            "description" : "If the definition was provided in the github config file (.launchblock/config.json)"
+          },
+          "build" : {
+            "description" : "Information about how to build this project",
+            "type" : [ "object", "null" ],
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/ProjectBuildModel"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "deploy" : {
+            "description" : "Information about how to deploy this project",
+            "type" : [ "object", "null" ],
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/ProjectDeployModel"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "restart" : {
+            "description" : "How to handle restarts or failures in this project",
+            "type" : [ "object", "null" ],
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/ProjectRestartModel"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "limits" : {
+            "description" : "Limits to how much resources your project can use",
+            "type" : [ "object", "null" ],
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/ProjectLimitsModel"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "scaling" : {
+            "description" : "Instructions on how to scale your project",
+            "type" : [ "object", "null" ],
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/ProjectScalingModel"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "volumes" : {
+            "type" : [ "array", "null" ],
+            "uniqueItems" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/ProjectVolumesModel"
             },
-            "description": "Storage attachments your project needs to persist over containers"
+            "description" : "Storage attachments your project needs to persist over containers"
           },
-          "environment": {
-            "type": [
-              "array",
-              "null"
-            ],
-            "uniqueItems": true,
-            "items": {
-              "$ref": "#/components/schemas/ProjectEnvironmentModel"
+          "environment" : {
+            "type" : [ "array", "null" ],
+            "uniqueItems" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/ProjectEnvironmentModel"
             },
-            "description": "Information about any environment variables this project has"
+            "description" : "Information about any environment variables this project has"
           }
         }
       },
-      "LifecycleResponseModel": {
-        "type": "object",
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "description": "The identifier of this lifecycle"
+      "LifecycleResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "type" : "string",
+            "description" : "The identifier of this lifecycle"
           },
-          "commit": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "A GitHub commit attached to this lifecycle"
+          "commit" : {
+            "type" : [ "string", "null" ],
+            "description" : "A GitHub commit attached to this lifecycle"
           },
-          "image": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The docker image generated as part of the build stage"
+          "image" : {
+            "type" : [ "string", "null" ],
+            "description" : "The docker image generated as part of the build stage"
           },
-          "stateLog": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LifecycleStateLogModel"
+          "stateLog" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/LifecycleStateLogModel"
             },
-            "description": "A log of state changes that have happened to this lifecycle"
+            "description" : "A log of state changes that have happened to this lifecycle"
           },
-          "state": {
-            "description": "The current state of the lifecycle",
-            "type": "string",
-            "$ref": "#/components/schemas/LifecycleState"
+          "state" : {
+            "description" : "The current state of the lifecycle",
+            "type" : "string",
+            "$ref" : "#/components/schemas/LifecycleState"
           },
-          "stage": {
-            "description": "The current stage of the lifecycle",
-            "type": "string",
-            "$ref": "#/components/schemas/LifecycleStage"
+          "stage" : {
+            "description" : "The current stage of the lifecycle",
+            "type" : "string",
+            "$ref" : "#/components/schemas/LifecycleStage"
+          },
+          "buildLogs" : {
+            "type" : "string"
+          },
+          "deployLogs" : {
+            "type" : "string"
           }
         }
       },
-      "LifecycleStage": {
-        "type": "string",
-        "enum": [
-          "QUEUE",
-          "BUILD",
-          "DEPLOY",
-          "FAILED",
-          "REMOVED"
-        ]
+      "LifecycleStage" : {
+        "type" : "string",
+        "enum" : [ "QUEUE", "BUILD", "DEPLOY", "FAILED", "REMOVED" ]
       },
-      "LifecycleState": {
-        "type": "string",
-        "enum": [
-          "QUEUE",
-          "BUILDING",
-          "BUILD_FAILED",
-          "DEPLOYING",
-          "DEPLOY_FAILED",
-          "DEPLOYED",
-          "ROLLED_BACK",
-          "REPLACED"
-        ]
+      "LifecycleState" : {
+        "type" : "string",
+        "enum" : [ "QUEUE", "BUILDING", "BUILD_FAILED", "DEPLOYING", "DEPLOY_FAILED", "DEPLOYED", "ROLLED_BACK", "REPLACED" ]
       },
-      "LifecycleStateLogModel": {
-        "type": "object",
-        "properties": {
-          "state": {
-            "$ref": "#/components/schemas/LifecycleState"
+      "LifecycleStateLogModel" : {
+        "type" : "object",
+        "properties" : {
+          "state" : {
+            "$ref" : "#/components/schemas/LifecycleState"
           },
-          "timestamp": {
-            "$ref": "#/components/schemas/Instant"
+          "timestamp" : {
+            "$ref" : "#/components/schemas/Instant"
           }
         }
       },
-      "ModelBuildType": {
-        "type": "string",
-        "enum": [
-          "AUTO",
-          "DOCKERFILE",
-          "DOCKER_IMAGE"
-        ]
+      "ModelBuildType" : {
+        "type" : "string",
+        "enum" : [ "AUTO", "DOCKERFILE", "DOCKER_IMAGE" ]
       },
-      "ModelRestartType": {
-        "type": "string",
-        "enum": [
-          "ON_FAILURE"
-        ]
+      "ModelRestartType" : {
+        "type" : "string",
+        "enum" : [ "ON_FAILURE" ]
       },
-      "ModelScalingType": {
-        "type": "string",
-        "enum": [
-          "STATIC",
-          "AUTOSCALE",
-          "SUMMON"
-        ]
+      "ModelScalingType" : {
+        "type" : "string",
+        "enum" : [ "STATIC", "AUTOSCALE", "SUMMON" ]
       },
-      "PermissionModel": {
-        "type": "object",
-        "properties": {
-          "identifier": {
-            "type": "string"
+      "Permission" : {
+        "type" : "string",
+        "enum" : [ "CONTAINER", "VIEW_API_TOKENS", "CREATE_API_TOKENS", "DELETE_API_TOKENS", "CREATE_ENVIRONMENTS", "UPDATE_ENVIRONMENTS", "VIEW_ENVIRONMENTS", "DELETE_ENVIRONMENTS", "VIEW_WORKSPACE", "VIEW_GITHUB_REPOSITORIES", "VIEW_GITHUB_BRANCHES", "VIEW_GITHUB_COMMITS", "UPDATE_GITHUB_CONNECTION", "CREATE_PROJECTS", "UPDATE_PROJECTS", "DELETE_PROJECTS", "CREATE_LIFECYCLE", "VIEW_LIFECYCLES", "ROLLBACK_LIFECYCLES", "VIEW_CONTAINERS", "CREATE_CONTAINERS", "VIEW_GAME_INSTANCES", "CREATE_GAME_INSTANCES", "REMOVE_GAME_INSTANCES", "UPDATE_GAME_INSTANCES" ]
+      },
+      "PermissionModel" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "type" : "string"
           },
-          "description": {
-            "type": "string"
+          "description" : {
+            "type" : "string"
           }
         }
       },
-      "ProjectBuildModel": {
-        "type": "object",
-        "properties": {
-          "builder": {
-            "$ref": "#/components/schemas/ModelBuildType"
+      "ProjectBuildModel" : {
+        "type" : "object",
+        "properties" : {
+          "builder" : {
+            "$ref" : "#/components/schemas/ModelBuildType"
           },
-          "dockerPath": {
-            "type": "string"
+          "dockerPath" : {
+            "type" : "string"
           },
-          "dockerImage": {
-            "type": "string"
+          "dockerImage" : {
+            "type" : "string"
           }
         }
       },
-      "ProjectCreateUpdateRequestModel": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "A name for your project",
-            "examples": [
-              "Discord Bot"
-            ],
-            "minLength": 3,
-            "maxLength": 50
+      "ProjectCreateUpdateRequestModel" : {
+        "type" : "object",
+        "required" : [ "name" ],
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "A name for your project",
+            "examples" : [ "Discord Bot" ],
+            "minLength" : 3,
+            "maxLength" : 50
           },
-          "iconUrl": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The URL of an icon you'd like to give your project"
+          "iconUrl" : {
+            "type" : [ "string", "null" ],
+            "description" : "The URL of an icon you'd like to give your project"
           },
-          "game": {
-            "type": "boolean",
-            "description": "If this project is a game (Minecraft) project",
-            "default": false
+          "game" : {
+            "type" : "boolean",
+            "description" : "If this project is a game (Minecraft) project",
+            "default" : false
           },
-          "iconItemType": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The icon type for your game, shown in the in-game menu",
-            "default": "DIAMOND_SWORD"
+          "iconItemType" : {
+            "type" : [ "string", "null" ],
+            "description" : "The icon type for your game, shown in the in-game menu",
+            "default" : "DIAMOND_SWORD"
           },
-          "githubRepository": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The link to the github repository to listen for updates on",
-            "examples": [
-              "https://github.com/LaunchBlockMC/example-skywars"
-            ]
+          "githubRepository" : {
+            "type" : [ "string", "null" ],
+            "description" : "The link to the github repository to listen for updates on",
+            "examples" : [ "https://github.com/LaunchBlockMC/example-skywars" ]
           },
-          "githubBranch": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "The GitHub branch we should listen for changes on",
-            "examples": [
-              "main"
-            ]
+          "githubBranch" : {
+            "type" : [ "string", "null" ],
+            "description" : "The GitHub branch we should listen for changes on",
+            "examples" : [ "main" ]
           },
-          "environmentIdentifier": {
-            "description": "The identifier of the environment to create the project in",
-            "type": "string",
-            "$ref": "#/components/schemas/UUID"
+          "environmentIdentifier" : {
+            "description" : "The identifier of the environment to create the project in",
+            "type" : "string",
+            "$ref" : "#/components/schemas/UUID"
           }
         }
       },
-      "ProjectDeployModel": {
-        "type": "object",
-        "properties": {
-          "startCommand": {
-            "type": "string"
+      "ProjectDeployModel" : {
+        "type" : "object",
+        "properties" : {
+          "startCommand" : {
+            "type" : "string"
           }
         }
       },
-      "ProjectEnvironmentModel": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+      "ProjectEnvironmentModel" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
           },
-          "value": {
-            "type": "string"
+          "value" : {
+            "type" : "string"
           }
         }
       },
-      "ProjectLimitsModel": {
-        "type": "object",
-        "properties": {
-          "cpu": {
-            "type": "integer",
-            "format": "int32"
+      "ProjectLimitsModel" : {
+        "type" : "object",
+        "properties" : {
+          "cpu" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "memoryGB": {
-            "type": "integer",
-            "format": "int32"
+          "memoryGB" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
-      "ProjectResponseModel": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "A name for your project",
-            "examples": [
-              "Discord Bot"
-            ],
-            "minLength": 3,
-            "maxLength": 50
+      "ProjectResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "description" : "The identifier of the project",
+            "type" : "string",
+            "$ref" : "#/components/schemas/UUID"
           },
-          "iconUrl": {
-            "type": "string",
-            "description": "The URL of an icon you'd like to give your project"
+          "name" : {
+            "type" : "string",
+            "description" : "A name for your project",
+            "examples" : [ "Discord Bot" ],
+            "minLength" : 3,
+            "maxLength" : 50
           },
-          "game": {
-            "type": "boolean",
-            "description": "If this project is a game (Minecraft) project",
-            "default": false
+          "iconUrl" : {
+            "type" : "string",
+            "description" : "The URL of an icon you'd like to give your project"
           },
-          "iconItemType": {
-            "type": "string",
-            "description": "The icon type for your game, shown in the in-game menu",
-            "default": "DIAMOND_SWORD"
+          "game" : {
+            "type" : "boolean",
+            "description" : "If this project is a game (Minecraft) project",
+            "default" : false
           },
-          "githubRepository": {
-            "type": "string",
-            "description": "The link to the github repository to listen for updates on",
-            "examples": [
-              "https://github.com/LaunchBlockMC/example-skywars"
-            ]
+          "iconItemType" : {
+            "type" : "string",
+            "description" : "The icon type for your game, shown in the in-game menu",
+            "default" : "DIAMOND_SWORD"
           },
-          "githubBranch": {
-            "type": "string",
-            "description": "The GitHub branch we should listen for changes on",
-            "examples": [
-              "main"
-            ]
+          "githubRepository" : {
+            "type" : "string",
+            "description" : "The link to the github repository to listen for updates on",
+            "examples" : [ "https://github.com/LaunchBlockMC/example-skywars" ]
           },
-          "removable": {
-            "type": "boolean",
-            "description": "If the project can be removed from the environment",
-            "default": true
+          "githubBranch" : {
+            "type" : "string",
+            "description" : "The GitHub branch we should listen for changes on",
+            "examples" : [ "main" ]
+          },
+          "removable" : {
+            "type" : "boolean",
+            "description" : "If the project can be removed from the environment",
+            "default" : true
           }
         }
       },
-      "ProjectRestartModel": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "$ref": "#/components/schemas/ModelRestartType"
+      "ProjectRestartModel" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/components/schemas/ModelRestartType"
           },
-          "maxTries": {
-            "type": "integer",
-            "format": "int32"
+          "maxTries" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
-      "ProjectScalingModel": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "$ref": "#/components/schemas/ModelScalingType"
+      "ProjectScalingModel" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/components/schemas/ModelScalingType"
           },
-          "amount": {
-            "type": "integer",
-            "format": "int32"
+          "amount" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "min": {
-            "type": "integer",
-            "format": "int32"
+          "min" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "max": {
-            "type": "integer",
-            "format": "int32"
+          "max" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "cpuThreshold": {
-            "type": "integer",
-            "format": "int32"
+          "cpuThreshold" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "memoryThreshold": {
-            "type": "integer",
-            "format": "int32"
+          "memoryThreshold" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "minPlayers": {
-            "type": "integer",
-            "format": "int32"
+          "minPlayers" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "maxPlayers": {
-            "type": "integer",
-            "format": "int32"
+          "maxPlayers" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },
-      "ProjectVolumesModel": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+      "ProjectVolumesModel" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
           },
-          "mountPath": {
-            "type": "string"
+          "mountPath" : {
+            "type" : "string"
           },
-          "size": {
-            "type": "string",
-            "format": "\\b\\d+(?:\\.\\d+)?\\s*(?:B|Ki|Mi|Gi|Ti|Pi|Ei|Zi|Yi)\\b\n",
-            "examples": [
-              "10Gi"
-            ]
+          "size" : {
+            "type" : "string",
+            "format" : "\\b\\d+(?:\\.\\d+)?\\s*(?:B|Ki|Mi|Gi|Ti|Pi|Ei|Zi|Yi)\\b\n",
+            "examples" : [ "10Gi" ]
           }
         }
       },
-      "UUID": {
-        "type": "string",
-        "format": "uuid",
-        "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+      "TokenResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "workspaceIdentifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "environmentIdentifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "expiryTimestamp" : {
+            "$ref" : "#/components/schemas/Instant"
+          },
+          "scope" : {
+            "type" : "array",
+            "uniqueItems" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/Permission"
+            }
+          }
+        }
+      },
+      "UUID" : {
+        "type" : "string",
+        "format" : "uuid",
+        "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
       }
     }
   },
-  "tags": [
-    {
-      "name": "API Token Management"
-    },
-    {
-      "name": "Environments"
-    },
-    {
-      "name": "Lifecycles",
-      "description": "Trigger and get information about builds & deployments for a project"
-    },
-    {
-      "name": "Permissions"
-    },
-    {
-      "name": "Projects",
-      "description": "Create and manage projects within an environment"
-    }
-  ],
-  "paths": {
-    "/permissions/static": {
-      "get": {
-        "summary": "Get a static list of permissions you can add to an API token",
-        "operationId": "Permissions.staticList",
-        "tags": [
-          "Permissions"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "uniqueItems": true,
-                  "items": {
-                    "$ref": "#/components/schemas/PermissionModel"
+  "tags" : [ {
+    "name" : "API Tokens",
+    "description" : "Management and metadata about API tokens"
+  }, {
+    "name" : "Containers",
+    "description" : "View and manage containers running on a deployment within a project"
+  }, {
+    "name" : "GitHub Metadata",
+    "description" : "GitHub metadata for repositories linked to the workspace"
+  }, {
+    "name" : "Lifecycles",
+    "description" : "Trigger and get information about builds & deployments for a project"
+  }, {
+    "name" : "Permissions",
+    "description" : "Permissions that can be awarded to an API token"
+  }, {
+    "name" : "Projects",
+    "description" : "Create and manage projects within an environment"
+  } ],
+  "paths" : {
+    "/v1/github/branches" : {
+      "get" : {
+        "summary" : "Get a list of branches on a repository",
+        "operationId" : "GitHub.listBranches",
+        "tags" : [ "GitHub Metadata" ],
+        "parameters" : [ {
+          "name" : "repository_url",
+          "in" : "query",
+          "schema" : {
+            "description" : "A link to the GitHub repository",
+            "type" : "string",
+            "examples" : [ "https://github.com/LaunchBlockMC/example-skywars" ]
+          },
+          "required" : true
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "uniqueItems" : true,
+                  "items" : {
+                    "type" : "string"
                   }
                 }
               }
@@ -527,22 +555,106 @@
         }
       }
     },
-    "/projects": {
-      "get": {
-        "summary": "Get a list of projects within an environment",
-        "operationId": "Projects.list",
-        "tags": [
-          "Projects"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProjectResponseModel"
+    "/v1/github/commits" : {
+      "get" : {
+        "summary" : "Get a list of commits on a branch of a repository",
+        "operationId" : "GitHub.listCommits",
+        "tags" : [ "GitHub Metadata" ],
+        "parameters" : [ {
+          "name" : "branch_name",
+          "in" : "query",
+          "schema" : {
+            "description" : "Name of the branch to find commits on",
+            "type" : "string",
+            "examples" : [ "main" ]
+          },
+          "required" : true
+        }, {
+          "name" : "repository_url",
+          "in" : "query",
+          "schema" : {
+            "description" : "A link to the GitHub repository",
+            "type" : "string",
+            "examples" : [ "https://github.com/LaunchBlockMC/example-skywars" ]
+          },
+          "required" : true
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GitCommitResponseModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/github/repositories" : {
+      "get" : {
+        "summary" : "Get a list of repositories in a workspace",
+        "operationId" : "GitHub.listRepositories",
+        "tags" : [ "GitHub Metadata" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GitRepositoryResponseModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions/static" : {
+      "get" : {
+        "summary" : "Get a static list of permissions you can add to an API token",
+        "operationId" : "Permissions.staticList",
+        "tags" : [ "Permissions" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "uniqueItems" : true,
+                  "items" : {
+                    "$ref" : "#/components/schemas/PermissionModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects" : {
+      "get" : {
+        "summary" : "Get a list of projects within an environment",
+        "operationId" : "Projects.list",
+        "tags" : [ "Projects" ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProjectResponseModel"
                   }
                 }
               }
@@ -550,29 +662,27 @@
           }
         }
       },
-      "post": {
-        "summary": "Create a project within an environment",
-        "operationId": "Projects.create",
-        "tags": [
-          "Projects"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProjectCreateUpdateRequestModel"
+      "post" : {
+        "summary" : "Create a project within an environment",
+        "operationId" : "Projects.create",
+        "tags" : [ "Projects" ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProjectCreateUpdateRequestModel"
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectResponseModel"
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectResponseModel"
                 }
               }
             }
@@ -580,133 +690,116 @@
         }
       }
     },
-    "/projects/{identifier}": {
-      "post": {
-        "summary": "Update the details about a project within an environment",
-        "operationId": "Projects.update",
-        "tags": [
-          "Projects"
-        ],
-        "parameters": [
-          {
-            "name": "identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
+    "/v1/projects/{identifier}" : {
+      "post" : {
+        "summary" : "Update the details about a project within an environment",
+        "operationId" : "Projects.update",
+        "tags" : [ "Projects" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
           }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProjectCreateUpdateRequestModel"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProjectCreateUpdateRequestModel"
               }
             }
           },
-          "required": true
+          "required" : true
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectResponseModel"
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectResponseModel"
                 }
               }
             }
           }
         }
       },
-      "get": {
-        "summary": "Get a specified project within an environment",
-        "operationId": "Projects.get",
-        "tags": [
-          "Projects"
-        ],
-        "parameters": [
-          {
-            "name": "identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
+      "get" : {
+        "summary" : "Get a specified project within an environment",
+        "operationId" : "Projects.get",
+        "tags" : [ "Projects" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectResponseModel"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectResponseModel"
                 }
               }
             }
           }
         }
       },
-      "delete": {
-        "summary": "Delete a specified project from an environment",
-        "operationId": "Projects.delete",
-        "tags": [
-          "Projects"
-        ],
-        "parameters": [
-          {
-            "name": "identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
+      "delete" : {
+        "summary" : "Delete a specified project from an environment",
+        "operationId" : "Projects.delete",
+        "tags" : [ "Projects" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
           }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           }
         }
       }
     },
-    "/projects/{project_identifier}/lifecycles": {
-      "get": {
-        "summary": "Get a list of lifecycles in a project",
-        "operationId": "Lifecycle.list",
-        "tags": [
-          "Lifecycles"
-        ],
-        "parameters": [
-          {
-            "name": "project_identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 25
-            }
+    "/v1/projects/{project_identifier}/lifecycles" : {
+      "get" : {
+        "summary" : "Get a list of lifecycles in a project",
+        "operationId" : "Lifecycle.list",
+        "tags" : [ "Lifecycles" ],
+        "parameters" : [ {
+          "name" : "project_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LifecycleResponseModel"
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LifecycleResponseModel"
                   }
                 }
               }
@@ -715,75 +808,76 @@
         }
       }
     },
-    "/projects/{project_identifier}/lifecycles/{identifier}": {
-      "delete": {
-        "summary": "Rollback a specified lifecycle in a project to the previous successful lifecycle",
-        "operationId": "Lifecycle.rollback",
-        "tags": [
-          "Lifecycles"
-        ],
-        "parameters": [
-          {
-            "name": "identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
-          },
-          {
-            "name": "project_identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
+    "/v1/projects/{project_identifier}/lifecycles/{deployment_identifier}/containers" : {
+      "get" : {
+        "summary" : "Get a list of running containers in a deployment",
+        "operationId" : "Containers.list",
+        "tags" : [ "Containers" ],
+        "parameters" : [ {
+          "name" : "deployment_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LifecycleResponseModel"
+        }, {
+          "name" : "healthy_only",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 100
+          }
+        }, {
+          "name" : "online_only",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ContainerResponseModel"
+                  }
                 }
               }
             }
           }
         }
       },
-      "get": {
-        "summary": "Get a specified lifecycle in a project",
-        "operationId": "Lifecycle.get",
-        "tags": [
-          "Lifecycles"
-        ],
-        "parameters": [
-          {
-            "name": "identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
-          },
-          {
-            "name": "project_identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
+      "post" : {
+        "summary" : "Summon a new container attached to a deployment",
+        "operationId" : "Containers.create",
+        "tags" : [ "Containers" ],
+        "parameters" : [ {
+          "name" : "deployment_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LifecycleResponseModel"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContainerResponseModel"
                 }
               }
             }
@@ -791,38 +885,163 @@
         }
       }
     },
-    "/projects/{project_identifier}/lifecycles/{identifier}/configuration": {
-      "get": {
-        "summary": "Get the project configuration attached to a lifecycle",
-        "operationId": "Lifecycle.configuration",
-        "tags": [
-          "Lifecycles"
-        ],
-        "parameters": [
-          {
-            "name": "identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
-            }
-          },
-          {
-            "name": "project_identifier",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/UUID"
+    "/v1/projects/{project_identifier}/lifecycles/{deployment_identifier}/containers/{identifier}" : {
+      "delete" : {
+        "summary" : "Remove a specified container that is attached to a deployment",
+        "operationId" : "Containers.delete",
+        "tags" : [ "Containers" ],
+        "parameters" : [ {
+          "name" : "deployment_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContainerResponseModel"
+                }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LifecycleConfigurationResponseModel"
+        }
+      }
+    },
+    "/v1/projects/{project_identifier}/lifecycles/{identifier}" : {
+      "delete" : {
+        "summary" : "Rollback a specified lifecycle in a project to the previous successful lifecycle",
+        "operationId" : "Lifecycle.rollback",
+        "tags" : [ "Lifecycles" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "project_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LifecycleResponseModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get" : {
+        "summary" : "Get a specified lifecycle in a project",
+        "operationId" : "Lifecycle.get",
+        "tags" : [ "Lifecycles" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "project_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LifecycleResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{project_identifier}/lifecycles/{identifier}/configuration" : {
+      "get" : {
+        "summary" : "Get the project configuration attached to a lifecycle",
+        "operationId" : "Lifecycle.configuration",
+        "tags" : [ "Lifecycles" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "project_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LifecycleConfigurationResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tokens/{identifier}" : {
+      "get" : {
+        "summary" : "Get details about a specified API token",
+        "operationId" : "Tokens.get",
+        "tags" : [ "API Tokens" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "description" : "The identifier of the token to view details of",
+            "type" : "string",
+            "examples" : [ "03e0db3a-3214-496b-b9c8-009dfda30453", "@self" ],
+            "default" : "@self"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenResponseModel"
                 }
               }
             }
