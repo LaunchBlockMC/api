@@ -38,12 +38,13 @@ public class LifecyclesEndpoint {
     @GET
     @RequiredPermission(value = Permission.VIEW_LIFECYCLES)
     public Uni<List<LifecycleResponseModel>> listLifecycles(
-            @QueryParam("limit") @DefaultValue("25") final int limit,
+            @QueryParam("per_page") @DefaultValue("25") final int perPage,
+            @QueryParam("page") @DefaultValue("1") final int page,
             @NotNull @PathParam("project_identifier") final UUID projectIdentifier) {
         if (this.contextHolder.getEnvironmentIdentifier() == null) {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
         }
-        return this.lifecyclesClient.listLifecycles(limit, projectIdentifier);
+        return this.lifecyclesClient.listLifecycles(projectIdentifier, perPage, page);
     }
 
     @Operation(operationId = "Lifecycle.get", summary = "Get a specified lifecycle in a project")

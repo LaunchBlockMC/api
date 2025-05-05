@@ -19,7 +19,7 @@ public interface LifecyclesClient {
 
     @GET
     @Path("/")
-    Uni<List<LifecycleResponseModel>> listLifecycles(@QueryParam("limit") final int limit, @QueryParam("project_identifier") final UUID projectIdentifier);
+    Uni<List<LifecycleResponseModel>> listLifecycles(@QueryParam("project_identifier") final UUID projectIdentifier, @QueryParam("per_page") final int perPage, @QueryParam("page") final int page);
 
     @GET
     @Path("/{identifier}")

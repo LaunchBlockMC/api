@@ -19,9 +19,6 @@ public class LifecycleResponseModel {
     @Schema(description = "A GitHub commit attached to this lifecycle", nullable = true)
     private String commit;
 
-    @Schema(description = "The docker image generated as part of the build stage", nullable = true)
-    private String image;
-
     @Schema(description = "A log of state changes that have happened to this lifecycle")
     private List<LifecycleStateLogModel> stateLog;
 
