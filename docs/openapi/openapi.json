@@ -192,10 +192,6 @@
             "type" : [ "string", "null" ],
             "description" : "A GitHub commit attached to this lifecycle"
           },
-          "image" : {
-            "type" : [ "string", "null" ],
-            "description" : "The docker image generated as part of the build stage"
-          },
           "stateLog" : {
             "type" : "array",
             "items" : {
@@ -254,7 +250,7 @@
       },
       "Permission" : {
         "type" : "string",
-        "enum" : [ "CONTAINER", "VIEW_API_TOKENS", "CREATE_API_TOKENS", "DELETE_API_TOKENS", "CREATE_ENVIRONMENTS", "UPDATE_ENVIRONMENTS", "VIEW_ENVIRONMENTS", "DELETE_ENVIRONMENTS", "VIEW_WORKSPACE", "VIEW_GITHUB_REPOSITORIES", "VIEW_GITHUB_BRANCHES", "VIEW_GITHUB_COMMITS", "UPDATE_GITHUB_CONNECTION", "CREATE_PROJECTS", "UPDATE_PROJECTS", "DELETE_PROJECTS", "CREATE_LIFECYCLE", "VIEW_LIFECYCLES", "ROLLBACK_LIFECYCLES", "VIEW_CONTAINERS", "CREATE_CONTAINERS", "VIEW_GAME_INSTANCES", "CREATE_GAME_INSTANCES", "REMOVE_GAME_INSTANCES", "UPDATE_GAME_INSTANCES" ]
+        "enum" : [ "CONTAINER", "VIEW_API_TOKENS", "CREATE_API_TOKENS", "DELETE_API_TOKENS", "CREATE_ENVIRONMENTS", "UPDATE_ENVIRONMENTS", "VIEW_ENVIRONMENTS", "DELETE_ENVIRONMENTS", "VIEW_WORKSPACE", "VIEW_GITHUB_REPOSITORIES", "VIEW_GITHUB_BRANCHES", "VIEW_GITHUB_COMMITS", "UPDATE_GITHUB_CONNECTION", "CREATE_PROJECTS", "UPDATE_PROJECTS", "DELETE_PROJECTS", "CREATE_LIFECYCLE", "VIEW_LIFECYCLES", "ROLLBACK_LIFECYCLES", "VIEW_CONTAINERS", "CREATE_CONTAINERS", "VIEW_SCALE_GOALS", "VIEW_GAME_INSTANCES", "CREATE_GAME_INSTANCES", "REMOVE_GAME_INSTANCES", "UPDATE_GAME_INSTANCES" ]
       },
       "PermissionModel" : {
         "type" : "object",
@@ -465,6 +461,25 @@
           }
         }
       },
+      "ScalingGoalResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "meetsScalingStrategy" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "boolean"
+            }
+          },
+          "onlineContainers" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "startingContainers" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "TokenResponseModel" : {
         "type" : "object",
         "properties" : {
@@ -520,6 +535,9 @@
   }, {
     "name" : "Projects",
     "description" : "Create and manage projects within an environment"
+  }, {
+    "name" : "Scaling",
+    "description" : "View how we're scaling containers for projects"
   } ],
   "paths" : {
     "/v1/github/branches" : {
@@ -783,7 +801,15 @@
             "$ref" : "#/components/schemas/UUID"
           }
         }, {
-          "name" : "limit",
+          "name" : "page",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 1
+          }
+        }, {
+          "name" : "per_page",
           "in" : "query",
           "schema" : {
             "type" : "integer",
@@ -912,6 +938,33 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ContainerResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/projects/{project_identifier}/lifecycles/{deployment_identifier}/scaling" : {
+      "get" : {
+        "summary" : "Get information about progress towards the set down scaling parameters",
+        "operationId" : "Scaling.get",
+        "tags" : [ "Scaling" ],
+        "parameters" : [ {
+          "name" : "deployment_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ScalingGoalResponseModel"
                 }
               }
             }

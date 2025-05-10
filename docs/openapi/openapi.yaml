@@ -159,11 +159,6 @@ components:
           - string
           - "null"
           description: A GitHub commit attached to this lifecycle
-        image:
-          type:
-          - string
-          - "null"
-          description: The docker image generated as part of the build stage
         stateLog:
           type: array
           items:
@@ -247,6 +242,7 @@ components:
       - ROLLBACK_LIFECYCLES
       - VIEW_CONTAINERS
       - CREATE_CONTAINERS
+      - VIEW_SCALE_GOALS
       - VIEW_GAME_INSTANCES
       - CREATE_GAME_INSTANCES
       - REMOVE_GAME_INSTANCES
@@ -419,6 +415,19 @@ components:
             \b\d+(?:\.\d+)?\s*(?:B|Ki|Mi|Gi|Ti|Pi|Ei|Zi|Yi)\b
           examples:
           - 10Gi
+    ScalingGoalResponseModel:
+      type: object
+      properties:
+        meetsScalingStrategy:
+          type: object
+          additionalProperties:
+            type: boolean
+        onlineContainers:
+          type: integer
+          format: int32
+        startingContainers:
+          type: integer
+          format: int32
     TokenResponseModel:
       type: object
       properties:
@@ -456,6 +465,8 @@ tags:
   description: Permissions that can be awarded to an API token
 - name: Projects
   description: Create and manage projects within an environment
+- name: Scaling
+  description: View how we're scaling containers for projects
 paths:
   /v1/github/branches:
     get:
@@ -647,7 +658,13 @@ paths:
         required: true
         schema:
           $ref: "#/components/schemas/UUID"
-      - name: limit
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: per_page
         in: query
         schema:
           type: integer
@@ -741,6 +758,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ContainerResponseModel"
+  /v1/projects/{project_identifier}/lifecycles/{deployment_identifier}/scaling:
+    get:
+      summary: Get information about progress towards the set down scaling parameters
+      operationId: Scaling.get
+      tags:
+      - Scaling
+      parameters:
+      - name: deployment_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScalingGoalResponseModel"
   /v1/projects/{project_identifier}/lifecycles/{identifier}:
     delete:
       summary: Rollback a specified lifecycle in a project to the previous successful

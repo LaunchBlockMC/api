@@ -12,6 +12,7 @@ import gg.launchblock.api.exception.base.BuiltInExceptions;
 import gg.launchblock.api.exception.base.LaunchBlockException;
 import gg.launchblock.api.models.base.request.AuthVerificationRequest;
 import gg.launchblock.api.service.TokenService;
+import gg.launchblock.api.user.base.ActorType;
 import gg.launchblock.api.user.base.LaunchBlockActor;
 import gg.launchblock.api.user.base.RequestContextHolder;
 import io.quarkus.logging.Log;
@@ -121,7 +122,21 @@ public class PermissionCheckFilter {
                                         final boolean isApiToken =
                                                 permissionListResponse.getPermissions().contains("api_token");
 
-                                        final LaunchBlockActor launchBlockActor = new LaunchBlockActor(!isApplication && !isContainer && !isApiToken, permissionListResponse.getUserIdentifier());
+                                        ActorType actorType = ActorType.USER;
+
+                                        if (isApiToken) {
+                                            actorType = ActorType.API_TOKEN;
+                                        }
+
+                                        if (isContainer) {
+                                            actorType = ActorType.CONTAINER;
+                                        }
+
+                                        if (isApplication) {
+                                            actorType = ActorType.APPLICATION;
+                                        }
+
+                                        final LaunchBlockActor launchBlockActor = new LaunchBlockActor(actorType, permissionListResponse.getUserIdentifier());
                                         launchBlockActor.setPermissions(permissionListResponse.getWorkspaceIdentifier().toString(), permissionListResponse.getPermissions());
                                         launchBlockActor.setHighestGroupPriority(permissionListResponse.getWorkspaceIdentifier().toString(), permissionListResponse.getHighestGroupPriority());
 
@@ -134,8 +149,8 @@ public class PermissionCheckFilter {
 
                                         // verify request contains given permission list
                                         if (!launchBlockActor.hasPermissions(String.valueOf(workspaceIdentifier), permissionsRequired)) {
-                                            Log.error("User " + userIdentifier + " does not have permissions " + permissionsRequires + " for " + method.getName() + " in workspace " + workspaceIdentifier);
-                                            throw new LaunchBlockException(BuiltInExceptions.NO_PERMISSION, userIdentifier + " does not have permission", String.join(", ", permissionsRequired));
+                                            Log.error(launchBlockActor.getUri() + " does not have permissions " + permissionsRequires + " for " + method.getName() + " in workspace " + workspaceIdentifier);
+                                            throw new LaunchBlockException(BuiltInExceptions.NO_PERMISSION, launchBlockActor.getUri() + " does not have permission", String.join(", ", permissionsRequired));
                                         }
 
                                     })

@@ -29,11 +29,15 @@ spec:
               value: "http://api-envman"
             - name: LIFECYCLES_CLIENT_URL
               value: "http://api-envman"
+            - name: VARIABLES_CLIENT_URL
+              value: "http://api-variables"
             - name: PROJECTS_CLIENT_URL
               value: "http://api-envman"
             - name: GITHUB_CLIENT_URL
               value: "http://svc-github"
             - name: CONTAINERS_CLIENT_URL
+              value: "http://api-scaler"
+            - name: SCALING_CLIENT_URL
               value: "http://api-scaler"
             - name: MONGODB_CONNECTION_STRING
               value: "mongodb://mongodb.launchblock-services.svc.cluster.local:27017"

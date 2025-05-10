@@ -6,10 +6,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Contract;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -18,8 +15,8 @@ import java.util.UUID;
 public class LaunchBlockActor {
 
     private final static String WILCARD = "*";
+    private final ActorType actorType;
 
-    private final boolean isUser;
     private final UUID identifier;
 
     // workspaceid : permissions
@@ -27,6 +24,10 @@ public class LaunchBlockActor {
     private Map<String, Set<String>> permissions = new HashMap<>();
     private Map<String, Integer> highestGroupPriority = new HashMap<>();
     private Map<String, Object> extraObjects = new HashMap<>();
+
+    public boolean isUser() {
+        return this.actorType == ActorType.USER;
+    }
 
     private static boolean matchesWildcard(final String pattern, final String permission) {
         if (pattern.equals(LaunchBlockActor.WILCARD) && !permission.equals("application")) {
@@ -44,9 +45,14 @@ public class LaunchBlockActor {
 
     @JsonCreator
     public static LaunchBlockActor fromUri(final String uri) {
-        final boolean isUser = uri.startsWith("user:");
+        final String prefix = uri.split(":")[0] + ":";
+        final ActorType actorType = Arrays.stream(ActorType.values())
+                .filter(type -> type.getPrefix().equals(prefix))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid actor type prefix: " + prefix));
+
         final UUID uuid = UUID.fromString(uri.split(":")[1]);
-        return new LaunchBlockActor(isUser, uuid);
+        return new LaunchBlockActor(actorType, uuid);
     }
 
     public int getHighestGroupPriority(final String workspaceUUID) {
@@ -85,7 +91,7 @@ public class LaunchBlockActor {
 
     @JsonValue
     public String getUri() {
-        return (this.isUser ? "user:" : "application:") + this.identifier;
+        return this.actorType.getPrefix() + this.identifier;
     }
 
 }

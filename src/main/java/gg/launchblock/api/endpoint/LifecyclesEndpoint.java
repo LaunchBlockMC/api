@@ -2,11 +2,13 @@ package gg.launchblock.api.endpoint;
 
 import gg.launchblock.api.annotations.base.permissions.RequiredPermission;
 import gg.launchblock.api.clients.base.LifecyclesClient;
+import gg.launchblock.api.clients.base.VariablesClient;
 import gg.launchblock.api.constants.Permission;
 import gg.launchblock.api.exception.base.BuiltInExceptions;
 import gg.launchblock.api.exception.base.LaunchBlockException;
 import gg.launchblock.api.models.lifecycles.response.LifecycleConfigurationResponseModel;
 import gg.launchblock.api.models.lifecycles.response.LifecycleResponseModel;
+import gg.launchblock.api.models.variables.response.VariableResponseModel;
 import gg.launchblock.api.user.base.RequestContextHolder;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -31,6 +33,10 @@ public class LifecyclesEndpoint {
     @RestClient
     @Inject
     LifecyclesClient lifecyclesClient;
+
+    @RestClient
+    @Inject
+    VariablesClient variablesClient;
 
     @Operation(operationId = "Lifecycle.list", summary = "Get a list of lifecycles in a project")
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,6 +96,34 @@ public class LifecyclesEndpoint {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
         }
         return this.lifecyclesClient.rollbackLifecycle(identifier);
+    }
+
+    @Operation(operationId = "ProjectVariables.list", summary = "List all variables in a deployed version of the project")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
+    @Path("/{identifier}/variables")
+    @RequiredPermission(value = Permission.VIEW_VARIABLES)
+    public Uni<List<VariableResponseModel>> listVariables(@NotNull @PathParam("identifier") final UUID lifecycleIdentifier) {
+        if (this.contextHolder.getEnvironmentIdentifier() == null) {
+            throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
+        }
+        return this.variablesClient.listVariablesLifecycle(lifecycleIdentifier);
+    }
+
+    @Operation(operationId = "ProjectVariables.get", summary = "Get a project's variable by the variable's identifier")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
+    @Path("/{identifier}/variables/{variable_identifier}")
+    @RequiredPermission(value = Permission.VIEW_VARIABLES)
+    public Uni<VariableResponseModel> getVariable(
+            @NotNull @PathParam("identifier") final UUID lifecycleIdentifier,
+            @NotNull @PathParam("variable_identifier") final UUID identifier) {
+        if (this.contextHolder.getEnvironmentIdentifier() == null) {
+            throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
+        }
+        return this.variablesClient.getVariable(identifier);
     }
 
 }
