@@ -28,12 +28,4 @@ public class LifecycleResponseModel {
     @Schema(description = "The current stage of the lifecycle")
     public LifecycleStage stage;
 
-    public String getBuildLogs() {
-        return "https://api.launchblock.gg/v1/logs/" + this.identifier + "?lifecycle_stage=build";
-    }
-
-    public String getDeployLogs() {
-        return "https://api.launchblock.gg/v1/logs/" + this.identifier + "?lifecycle_stage=deploy";
-    }
-
 }

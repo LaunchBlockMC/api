@@ -47,6 +47,10 @@ public enum Permission {
     // scaling
     VIEW_SCALE_GOALS("view_scale_goals", "View progress towards set down scaling parameters"),
 
+    // logs
+    VIEW_LOGS("view_logs", "View the logs attached to a lifecycle"),
+    CREATE_LOGS("create_logs", "Create a set of logs attached to a container within a deployment", false),
+
     // variables (env vars)
     CREATE_VARIABLES("create_variables", "Create environment variables on a project or environment"),
     VIEW_VARIABLES("view_variables", "View variables attached to a project or environment"),

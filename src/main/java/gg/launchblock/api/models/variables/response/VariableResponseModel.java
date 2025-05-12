@@ -24,4 +24,6 @@ public class VariableResponseModel {
     private Instant expiryTimestamp;
     private boolean isExpired;
 
+    private VariableSource source;
+
 } 
