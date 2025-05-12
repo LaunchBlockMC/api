@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum LifecycleState {
+    PREPARING(LifecycleStage.QUEUE),
     QUEUE(LifecycleStage.QUEUE),
     BUILDING(LifecycleStage.BUILD),
     BUILD_FAILED(LifecycleStage.FAILED),
