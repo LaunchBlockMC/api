@@ -59,6 +59,7 @@ public class TokenOrchestrator {
                 .setIdentifier(requestModel.getForcedIdentifier() == null ?
                         UUID.randomUUID().toString() : requestModel.getForcedIdentifier().toString())
                 .setScope(requestModel.getScope())
+                .setContainer(requestModel.isContainer())
                 .setToken(TokenOrchestrator.generateRandomString());
 
         return this.tokenService.createToken(generatedEntity)
