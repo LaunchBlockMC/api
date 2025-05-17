@@ -9,3 +9,6 @@ SERVICE_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Deploy to kubernetes
 kubectl apply -f "$SERVICE_ROOT/kubernetes-deployment.yaml"
+
+# Rollout restart to ensure changes are picked up
+kubectl rollout restart deployment api-public -n launchblock-services
