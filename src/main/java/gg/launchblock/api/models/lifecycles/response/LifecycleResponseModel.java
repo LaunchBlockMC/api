@@ -1,5 +1,6 @@
 package gg.launchblock.api.models.lifecycles.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import gg.launchblock.api.models.lifecycles.LifecycleStage;
 import gg.launchblock.api.models.lifecycles.LifecycleState;
 import gg.launchblock.api.models.lifecycles.LifecycleStateLogModel;
@@ -11,10 +12,14 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LifecycleResponseModel {
 
     @Schema(description = "The identifier of this lifecycle")
     private String identifier;
+
+    @Schema(description = "The identifier of the previous lifecycle", nullable = true)
+    private String previousLifecycleIdentifier;
 
     @Schema(description = "A GitHub commit attached to this lifecycle", nullable = true)
     private String commit;

@@ -154,6 +154,11 @@ components:
         identifier:
           type: string
           description: The identifier of this lifecycle
+        previousLifecycleIdentifier:
+          type:
+          - string
+          - "null"
+          description: The identifier of the previous lifecycle
         commit:
           type:
           - string
@@ -172,10 +177,6 @@ components:
           description: The current stage of the lifecycle
           type: string
           $ref: "#/components/schemas/LifecycleStage"
-        buildLogs:
-          type: string
-        deployLogs:
-          type: string
     LifecycleStage:
       type: string
       enum:
@@ -187,6 +188,7 @@ components:
     LifecycleState:
       type: string
       enum:
+      - PREPARING
       - QUEUE
       - BUILDING
       - BUILD_FAILED
@@ -201,6 +203,67 @@ components:
         state:
           $ref: "#/components/schemas/LifecycleState"
         timestamp:
+          $ref: "#/components/schemas/Instant"
+    LogLevel:
+      type: string
+      enum:
+      - DEBUG
+      - INFO
+      - NOTICE
+      - WARN
+      - ERROR
+      - CRITICAL
+      - ALERT
+      - EMERGENCY
+      - TRACE
+      - FATAL
+    LogRequestModel:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The log message content
+        level:
+          description: The severity level of the log entry
+          type: string
+          $ref: "#/components/schemas/LogLevel"
+        stage:
+          $ref: "#/components/schemas/LifecycleStage"
+        timestamp:
+          description: Timestamp when the log entry was created
+          type: string
+          examples:
+          - 2024-03-20T10:15:30Z
+          $ref: "#/components/schemas/Instant"
+    LogResponseModel:
+      type: object
+      properties:
+        lifecycleIdentifier:
+          description: Unique identifier for the lifecycle instance
+          type: string
+          examples:
+          - 123e4567-e89b-12d3-a456-426614174000
+          $ref: "#/components/schemas/UUID"
+        containerIdentifier:
+          description: Unique identifier for the container instance
+          type: string
+          examples:
+          - 123e4567-e89b-12d3-a456-426614174000
+          $ref: "#/components/schemas/UUID"
+        message:
+          type: string
+          description: The log message content
+        level:
+          description: The severity level of the log entry
+          type: string
+          $ref: "#/components/schemas/LogLevel"
+        stage:
+          $ref: "#/components/schemas/LifecycleStage"
+        timestamp:
+          description: Timestamp when the log entry was created
+          type: string
+          examples:
+          - 2024-03-20T10:15:30Z
           $ref: "#/components/schemas/Instant"
     ModelBuildType:
       type: string
@@ -222,31 +285,37 @@ components:
       type: string
       enum:
       - CONTAINER
-      - VIEW_API_TOKENS
       - CREATE_API_TOKENS
+      - VIEW_API_TOKENS
       - DELETE_API_TOKENS
       - CREATE_ENVIRONMENTS
-      - UPDATE_ENVIRONMENTS
       - VIEW_ENVIRONMENTS
+      - UPDATE_ENVIRONMENTS
       - DELETE_ENVIRONMENTS
       - VIEW_WORKSPACE
+      - UPDATE_GITHUB_CONNECTION
       - VIEW_GITHUB_REPOSITORIES
       - VIEW_GITHUB_BRANCHES
       - VIEW_GITHUB_COMMITS
-      - UPDATE_GITHUB_CONNECTION
       - CREATE_PROJECTS
       - UPDATE_PROJECTS
       - DELETE_PROJECTS
       - CREATE_LIFECYCLE
       - VIEW_LIFECYCLES
       - ROLLBACK_LIFECYCLES
-      - VIEW_CONTAINERS
       - CREATE_CONTAINERS
+      - VIEW_CONTAINERS
       - VIEW_SCALE_GOALS
+      - VIEW_LOGS
+      - CREATE_LOGS
+      - CREATE_VARIABLES
+      - VIEW_VARIABLES
+      - UPDATE_VARIABLES
+      - DELETE_VARIABLES
       - VIEW_GAME_INSTANCES
       - CREATE_GAME_INSTANCES
-      - REMOVE_GAME_INSTANCES
       - UPDATE_GAME_INSTANCES
+      - REMOVE_GAME_INSTANCES
     PermissionModel:
       type: object
       properties:
@@ -418,7 +487,7 @@ components:
     ScalingGoalResponseModel:
       type: object
       properties:
-        meetsScalingStrategy:
+        actionRequired:
           type: object
           additionalProperties:
             type: boolean
@@ -426,6 +495,9 @@ components:
           type: integer
           format: int32
         startingContainers:
+          type: integer
+          format: int32
+        stoppingContainers:
           type: integer
           format: int32
     TokenResponseModel:
@@ -452,6 +524,50 @@ components:
       type: string
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+    VariableCreateRequestModel:
+      type: object
+      properties:
+        name:
+          type: string
+        secret:
+          type: boolean
+        content:
+          type: string
+        expiryTimestamp:
+          $ref: "#/components/schemas/Instant"
+    VariableResponseModel:
+      type: object
+      properties:
+        identifier:
+          type: string
+        projectIdentifier:
+          type: string
+        lifecycleIdentifier:
+          type: string
+        name:
+          type: string
+          description: The name of the variable to insert into containers
+          examples:
+          - PORT
+        secret:
+          type: boolean
+          description: To hide the contents of the variable in responses
+        content:
+          type: string
+        expiryTimestamp:
+          $ref: "#/components/schemas/Instant"
+        isExpired:
+          type: boolean
+        source:
+          $ref: "#/components/schemas/VariableSource"
+        expired:
+          type: boolean
+    VariableSource:
+      type: string
+      enum:
+      - AUTOMATIC
+      - USER_CREATED
+      - CONFIG_FILE
 tags:
 - name: API Tokens
   description: Management and metadata about API tokens
@@ -461,8 +577,12 @@ tags:
   description: GitHub metadata for repositories linked to the workspace
 - name: Lifecycles
   description: Trigger and get information about builds & deployments for a project
+- name: Logs
+  description: Fetch and query logs being emitted from projects
 - name: Permissions
   description: Permissions that can be awarded to an API token
+- name: Project Variables
+  description: Manage environment variables for a project
 - name: Projects
   description: Create and manage projects within an environment
 - name: Scaling
@@ -540,6 +660,35 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/GitRepositoryResponseModel"
+  /v1/logs/lifecycle/{lifecycle_identifier}:
+    post:
+      summary: Create a list of logs coming from a container
+      operationId: Logs.create
+      tags:
+      - Logs
+      parameters:
+      - name: lifecycle_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/LogRequestModel"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogResponseModel"
   /v1/permissions/static:
     get:
       summary: Get a static list of permissions you can add to an API token
@@ -663,12 +812,15 @@ paths:
         schema:
           type: integer
           format: int32
+          minimum: 1
           default: 1
       - name: per_page
         in: query
         schema:
           type: integer
           format: int32
+          maximum: 200
+          minimum: 1
           default: 25
       responses:
         "200":
@@ -849,6 +1001,156 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LifecycleConfigurationResponseModel"
+  /v1/projects/{project_identifier}/lifecycles/{identifier}/logs:
+    get:
+      summary: Get a list of logs attached to a lifecycle
+      operationId: Logs.list
+      tags:
+      - Lifecycles
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      - name: lifecycle_stage
+        in: query
+        schema:
+          allOf:
+          - $ref: "#/components/schemas/LifecycleStage"
+          - default: DEPLOY
+      - name: log_level
+        in: query
+        schema:
+          $ref: "#/components/schemas/LogLevel"
+      - name: message
+        in: query
+        schema:
+          description: Find logs where this is included in the message field
+          type: string
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          maximum: 100
+          minimum: 1
+          default: 50
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogResponseModel"
+  /v1/projects/{project_identifier}/lifecycles/{identifier}/variables:
+    get:
+      summary: List all variables in a deployed version of the project
+      operationId: ProjectVariables.list
+      tags:
+      - Lifecycles
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariableResponseModel"
+  /v1/projects/{project_identifier}/lifecycles/{identifier}/variables/{variable_identifier}:
+    get:
+      summary: Get a project's variable by the variable's identifier
+      operationId: ProjectVariables.get
+      tags:
+      - Lifecycles
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      - name: variable_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VariableResponseModel"
+  /v1/projects/{project_identifier}/variables:
+    delete:
+      summary: Delete variables from a project
+      operationId: ProjectVariables.delete
+      tags:
+      - Project Variables
+      parameters:
+      - name: project_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+                pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+                minLength: 1
+        required: true
+      responses:
+        "204":
+          description: No Content
+    post:
+      summary: Create a list of variables within a project
+      operationId: ProjectVariables.create
+      tags:
+      - Project Variables
+      parameters:
+      - name: project_identifier
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/UUID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/VariableCreateRequestModel"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariableResponseModel"
   /v1/tokens/{identifier}:
     get:
       summary: Get details about a specified API token
