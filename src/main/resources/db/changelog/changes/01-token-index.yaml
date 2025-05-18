@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: token-index
+      author: BillyDotWS
+      changes:
+        - createIndex:
+            collectionName: tokens
+            keys: '{ token: 1 }'
+            options: '{unique: true, name: "api_token_token_index"}'
+        - createIndex:
+            collectionName: tokens
+            keys: '{ workspaceIdentifier: 1, environmentIdentifier: 1 }'
+            options: '{unique: false, name: "api_token_workspace_environment_index", background: true}'
