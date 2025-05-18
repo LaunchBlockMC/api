@@ -63,6 +63,11 @@ spec:
                 secretKeyRef:
                   name: auth-secrets
                   key: token-salt
+            - name: API_TOKEN_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-public-secrets
+                  key: API_TOKEN_SECRET_KEY
           ports:
             - containerPort: 8080
 ---

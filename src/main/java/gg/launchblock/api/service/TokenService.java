@@ -19,11 +19,10 @@ public class TokenService {
     private final TokenRepository tokenRepository;
 
     public Uni<TokenEntity> createToken(final TokenEntity token) {
-        return this.tokenRepository.persist(token);
+        return this.tokenRepository.persistToken(token);
     }
 
     public Uni<List<TokenEntity>> getTokens(final String workspaceIdentifier, final String environmentIdentifier) {
-        // todo - create index on this query
         return this.tokenRepository.list(
                 new Document("workspaceIdentifier", workspaceIdentifier).append("environmentIdentifier", environmentIdentifier));
     }
@@ -41,8 +40,7 @@ public class TokenService {
 
     @CacheResult(cacheName = "authorization_token_resolution")
     public Uni<TokenEntity> fromAuthorizationToken(final String authToken) {
-        // todo - create index on this query
-        return this.tokenRepository.find(new Document("token", authToken.replace("Bearer ", ""))).firstResult();
+        return this.tokenRepository.findByUnencryptedToken(authToken.replace("Bearer ", ""));
     }
 
 }

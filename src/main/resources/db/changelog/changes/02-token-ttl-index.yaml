@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: token-ttl-index
+      author: BillyDotWS
+      changes:
+        - createIndex:
+            collectionName: tokens
+            keys: '{ expiryTimestamp: 1 }'
+            options: '{expireAfterSeconds: 1, name: "api_token_expiry_ttl_index"}' 

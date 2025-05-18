@@ -33,6 +33,15 @@ public class ExceptionMapper implements jakarta.ws.rs.ext.ExceptionMapper<Except
                     .build();
         }
 
+        if (e instanceof final IllegalArgumentException illegalArgumentException) {
+            if (illegalArgumentException.getMessage().contains("UUID string")) {
+                return Response.status(422)
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .entity(new ExceptionResponse("Invalid parameter", new ErrorDetails("LB-??", "A uuid parameter provided was malformed", "", "api"), ExceptionMapper.getCurrentTraceId()))
+                        .build();
+            }
+        }
+
         if (e instanceof final ClientWebApplicationException clientWebApplicationException) {
             final Response response = clientWebApplicationException.getResponse();
             final ExceptionResponse exceptionResponse = response.readEntity(ExceptionResponse.class);

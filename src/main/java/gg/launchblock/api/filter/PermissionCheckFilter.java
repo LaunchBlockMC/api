@@ -26,10 +26,12 @@ import lombok.RequiredArgsConstructor;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static gg.launchblock.api.constants.AuthConstants.LAUNCH_BLOCK_ACTOR;
+import static gg.launchblock.api.exception.AppExceptions.EXPIRED_TOKEN;
 import static gg.launchblock.api.exception.base.BuiltInExceptions.ESSENTIAL_HEADERS_MISSING;
 
 
@@ -76,6 +78,13 @@ public class PermissionCheckFilter {
 
         return tokenEntityUni
                 .flatMap(token -> {
+                    if (token == null && this.requestContextHolder.getAuthorizationToken() != null) {
+                        throw new LaunchBlockException(EXPIRED_TOKEN);
+                    }
+
+                    if (token != null && token.getExpiryTimestamp().isBefore(Instant.now())) {
+                        throw new LaunchBlockException(EXPIRED_TOKEN);
+                    }
 
                     if (token != null) {
                         this.requestContextHolder.getHeaders().add(AuthConstants.ENVIRONMENT_IDENTIFIER, token.getEnvironmentIdentifier());
