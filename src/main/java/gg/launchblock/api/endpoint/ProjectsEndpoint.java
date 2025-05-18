@@ -42,7 +42,7 @@ public class ProjectsEndpoint {
         if (this.contextHolder.getEnvironmentIdentifier() == null) {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
         }
-        if (body.getEnvironmentIdentifier() != this.contextHolder.getEnvironmentIdentifier()) {
+        if (!body.getEnvironmentIdentifier().equals(this.contextHolder.getEnvironmentIdentifier())) {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING,
                     "Environment identifier provided in body mismatches authorization headers", "environment-identifier");
         }
@@ -83,7 +83,7 @@ public class ProjectsEndpoint {
         if (this.contextHolder.getEnvironmentIdentifier() == null) {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
         }
-        if (body.getEnvironmentIdentifier() != this.contextHolder.getEnvironmentIdentifier()) {
+        if (!body.getEnvironmentIdentifier().equals(this.contextHolder.getEnvironmentIdentifier())) {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING,
                     "Environment identifier provided in body mismatches authorization headers", "environment-identifier");
         }
