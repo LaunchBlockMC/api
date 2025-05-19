@@ -13,7 +13,7 @@ public enum LifecycleState {
     DEPLOYING(LifecycleStage.DEPLOY),
     DEPLOY_FAILED(LifecycleStage.FAILED),
     DEPLOYED(LifecycleStage.DEPLOY),
-    ROLLED_BACK(LifecycleStage.REMOVED),
+    REMOVED(LifecycleStage.REMOVED),
     REPLACED(LifecycleStage.REMOVED);
 
     private final LifecycleStage stage;
