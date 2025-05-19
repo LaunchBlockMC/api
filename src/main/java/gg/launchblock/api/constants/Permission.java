@@ -39,6 +39,7 @@ public enum Permission {
     CREATE_LIFECYCLE("create_lifecycles", "Trigger a deployment to occur inside of a project within an environment"),
     VIEW_LIFECYCLES("view_lifecycles", "View deployments within a project in an environment"),
     ROLLBACK_LIFECYCLES("rollback_lifecycles", "Rollback a deployment to a previous one in a project"),
+    REMOVE_LIFECYCLES("delete_lifecycles", "Set a lifecycle as removed"),
 
     // deployment container scaling
     CREATE_CONTAINERS("create_containers", "Create new containers within a deployment"),

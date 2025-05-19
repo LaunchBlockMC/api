@@ -94,19 +94,30 @@ public class LifecyclesEndpoint {
         return this.lifecyclesClient.getLifecycleDefinition(identifier);
     }
 
-    @Operation(operationId = "Lifecycle.rollback", summary = "Rollback a specified lifecycle in a project to the previous successful lifecycle")
+    @Operation(operationId = "Lifecycle.rollback", summary = "Rollback to a previous lifecycle")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @DELETE
-    @Path("/{identifier}")
+    @Path("/")
     @RequiredPermission(value = Permission.ROLLBACK_LIFECYCLES)
     public Uni<LifecycleResponseModel> rollbackLifecycle(
             @NotNull @PathParam("project_identifier") final UUID projectIdentifier,
-            @NotNull @PathParam("identifier") final UUID identifier) {
+            @QueryParam("target_lifecycle_identifier") @Schema(description = "The lifecycle identifier to rollback to") final UUID identifier) {
         if (this.contextHolder.getEnvironmentIdentifier() == null) {
             throw new LaunchBlockException(BuiltInExceptions.ESSENTIAL_HEADERS_MISSING, "environment-identifier");
         }
-        return this.lifecyclesClient.rollbackLifecycle(identifier);
+        return Uni.createFrom().nullItem(); // todo
+    }
+
+    @Operation(operationId = "Lifecycle.delete", summary = "Delete a lifecycle by its identifier")
+    @DELETE
+    @Path("/{identifier}")
+    @RequiredPermission(Permission.REMOVE_LIFECYCLES)
+    public Uni<Void> deleteLifecycle(
+            @NotNull @PathParam("identifier") final UUID identifier,
+            @Schema(description = "Force the deletion instantly. If true, the deletion will immediately remove the associated resources (not graceful).")
+            @QueryParam("force") @DefaultValue("false") final boolean force) {
+        return this.lifecyclesClient.deleteLifecycle(identifier, force);
     }
 
     @Operation(operationId = "Logs.list", summary = "Get a list of logs attached to a lifecycle")
@@ -152,5 +163,4 @@ public class LifecyclesEndpoint {
         }
         return this.variablesClient.getVariable(identifier);
     }
-
 }

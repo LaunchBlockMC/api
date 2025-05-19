@@ -31,6 +31,6 @@ public interface LifecyclesClient {
 
     @DELETE
     @Path("/{identifier}")
-    Uni<LifecycleResponseModel> rollbackLifecycle(@PathParam("identifier") final UUID identifier);
+    Uni<Void> deleteLifecycle(@PathParam("identifier") final UUID identifier, @QueryParam("force") @DefaultValue("false") final boolean force);
 
 }
