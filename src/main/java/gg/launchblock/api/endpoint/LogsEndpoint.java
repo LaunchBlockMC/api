@@ -27,8 +27,8 @@ public class LogsEndpoint {
     @Inject
     @RestClient
     LogsClient logsClient;
-    
-    @Operation(operationId = "Logs.create", summary = "Create a list of logs coming from a container")
+
+    @Operation(operationId = "Logs.create", summary = "Create a list of logs coming from a container", hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @POST

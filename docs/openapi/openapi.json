@@ -221,7 +221,7 @@
       },
       "LifecycleState" : {
         "type" : "string",
-        "enum" : [ "PREPARING", "QUEUE", "BUILDING", "BUILD_FAILED", "DEPLOYING", "DEPLOY_FAILED", "DEPLOYED", "ROLLED_BACK", "REPLACED" ]
+        "enum" : [ "PREPARING", "QUEUE", "BUILDING", "BUILD_FAILED", "DEPLOYING", "DEPLOY_FAILED", "DEPLOYED", "REMOVED", "REPLACED" ]
       },
       "LifecycleStateLogModel" : {
         "type" : "object",
@@ -296,6 +296,82 @@
           }
         }
       },
+      "MatchCreateResponseModel" : {
+        "type" : "object",
+        "properties" : {
+          "matchGroupIdentifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "gameIdentifier" : {
+            "description" : "The identifier of the game instance that the match is tied to (if applicable)",
+            "type" : "string",
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "resultType" : {
+            "description" : "The type of result that was returned from the match submission",
+            "type" : "string",
+            "$ref" : "#/components/schemas/MatchRequestResult"
+          }
+        }
+      },
+      "MatchDetailsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "identifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "gameIdentifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "projectIdentifier" : {
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "minPlayers" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maxPlayers" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "playerCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "players" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid",
+              "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            }
+          }
+        }
+      },
+      "MatchRequestResult" : {
+        "type" : "string",
+        "enum" : [ "CREATED_NEW_GROUP", "ADDED_TO_EXISTING_GROUP" ]
+      },
+      "MatchSubmitRequest" : {
+        "type" : "object",
+        "required" : [ "projectIdentifier", "players" ],
+        "properties" : {
+          "projectIdentifier" : {
+            "description" : "The identifier of a project within your workspace",
+            "type" : "string",
+            "$ref" : "#/components/schemas/UUID"
+          },
+          "players" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid",
+              "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            },
+            "minItems" : 1
+          }
+        }
+      },
       "ModelBuildType" : {
         "type" : "string",
         "enum" : [ "AUTO", "DOCKERFILE", "DOCKER_IMAGE" ]
@@ -310,7 +386,7 @@
       },
       "Permission" : {
         "type" : "string",
-        "enum" : [ "CONTAINER", "CREATE_API_TOKENS", "VIEW_API_TOKENS", "DELETE_API_TOKENS", "CREATE_ENVIRONMENTS", "VIEW_ENVIRONMENTS", "UPDATE_ENVIRONMENTS", "DELETE_ENVIRONMENTS", "VIEW_WORKSPACE", "UPDATE_GITHUB_CONNECTION", "VIEW_GITHUB_REPOSITORIES", "VIEW_GITHUB_BRANCHES", "VIEW_GITHUB_COMMITS", "CREATE_PROJECTS", "UPDATE_PROJECTS", "DELETE_PROJECTS", "CREATE_LIFECYCLE", "VIEW_LIFECYCLES", "ROLLBACK_LIFECYCLES", "CREATE_CONTAINERS", "VIEW_CONTAINERS", "VIEW_SCALE_GOALS", "VIEW_LOGS", "CREATE_LOGS", "CREATE_VARIABLES", "VIEW_VARIABLES", "UPDATE_VARIABLES", "DELETE_VARIABLES", "VIEW_GAME_INSTANCES", "CREATE_GAME_INSTANCES", "UPDATE_GAME_INSTANCES", "REMOVE_GAME_INSTANCES" ]
+        "enum" : [ "CONTAINER", "CREATE_API_TOKENS", "VIEW_API_TOKENS", "DELETE_API_TOKENS", "CREATE_ENVIRONMENTS", "VIEW_ENVIRONMENTS", "UPDATE_ENVIRONMENTS", "DELETE_ENVIRONMENTS", "VIEW_WORKSPACE", "UPDATE_GITHUB_CONNECTION", "VIEW_GITHUB_REPOSITORIES", "VIEW_GITHUB_BRANCHES", "VIEW_GITHUB_COMMITS", "CREATE_PROJECTS", "UPDATE_PROJECTS", "DELETE_PROJECTS", "CREATE_LIFECYCLE", "VIEW_LIFECYCLES", "ROLLBACK_LIFECYCLES", "REMOVE_LIFECYCLES", "CREATE_CONTAINERS", "VIEW_CONTAINERS", "VIEW_SCALE_GOALS", "VIEW_LOGS", "CREATE_LOGS", "CREATE_VARIABLES", "VIEW_VARIABLES", "UPDATE_VARIABLES", "DELETE_VARIABLES", "VIEW_GAME_INSTANCES", "CREATE_MATCHMAKER_MATCH", "VIEW_MATCHMAKER_MATCH", "MANAGE_MATCHMAKER_MATCH", "CREATE_GAME_INSTANCES", "UPDATE_GAME_INSTANCES", "REMOVE_GAME_INSTANCES" ]
       },
       "PermissionModel" : {
         "type" : "object",
@@ -656,6 +732,9 @@
     "name" : "Logs",
     "description" : "Fetch and query logs being emitted from projects"
   }, {
+    "name" : "Matchmaker",
+    "description" : "Queue players for a project and view created matches"
+  }, {
     "name" : "Permissions",
     "description" : "Permissions that can be awarded to an API token"
   }, {
@@ -804,6 +883,98 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/matches" : {
+      "post" : {
+        "summary" : "Queue a player for a project",
+        "description" : "Note: The project must belong to your workspace, otherwise you will not be able to queue players.\n",
+        "operationId" : "Matchmaker.create",
+        "tags" : [ "Matchmaker" ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MatchSubmitRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MatchCreateResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/matches/{identifier}" : {
+      "get" : {
+        "summary" : "Get the information about a matchmaker group",
+        "operationId" : "Matchmaker.group",
+        "tags" : [ "Matchmaker" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MatchDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/matches/{identifier}/players" : {
+      "delete" : {
+        "summary" : "Remove players from a matchmaker match",
+        "operationId" : "Matchmaker.group",
+        "tags" : [ "Matchmaker" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string",
+                  "format" : "uuid",
+                  "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           }
         }
       }
@@ -961,6 +1132,40 @@
       }
     },
     "/v1/projects/{project_identifier}/lifecycles" : {
+      "delete" : {
+        "summary" : "Rollback to a previous lifecycle",
+        "operationId" : "Lifecycle.rollback",
+        "tags" : [ "Lifecycles" ],
+        "parameters" : [ {
+          "name" : "project_identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "target_lifecycle_identifier",
+          "in" : "query",
+          "schema" : {
+            "pattern" : "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+            "description" : "The lifecycle identifier to rollback to",
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LifecycleResponseModel"
+                }
+              }
+            }
+          }
+        }
+      },
       "get" : {
         "summary" : "Get a list of lifecycles in a project",
         "operationId" : "Lifecycle.list",
@@ -1148,38 +1353,6 @@
       }
     },
     "/v1/projects/{project_identifier}/lifecycles/{identifier}" : {
-      "delete" : {
-        "summary" : "Rollback a specified lifecycle in a project to the previous successful lifecycle",
-        "operationId" : "Lifecycle.rollback",
-        "tags" : [ "Lifecycles" ],
-        "parameters" : [ {
-          "name" : "identifier",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/UUID"
-          }
-        }, {
-          "name" : "project_identifier",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/UUID"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/LifecycleResponseModel"
-                }
-              }
-            }
-          }
-        }
-      },
       "get" : {
         "summary" : "Get a specified lifecycle in a project",
         "operationId" : "Lifecycle.get",
@@ -1209,6 +1382,32 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "Delete a lifecycle by its identifier",
+        "operationId" : "Lifecycle.delete",
+        "tags" : [ "Lifecycles" ],
+        "parameters" : [ {
+          "name" : "identifier",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        }, {
+          "name" : "force",
+          "in" : "query",
+          "schema" : {
+            "description" : "Force the deletion instantly. If true, the deletion will immediately remove the associated resources (not graceful).",
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           }
         }
       }

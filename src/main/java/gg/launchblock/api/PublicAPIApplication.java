@@ -38,7 +38,7 @@ import org.eclipse.microprofile.openapi.annotations.servers.Server;
         info =
         @Info(
                 title = "Public LaunchBlock API",
-                version = "0.0.1",
+                version = "0.0.3",
                 contact = @Contact(name = "LaunchBlock Discord Server", url = "https://discord.gg/LaunchBlock")),
         externalDocs =
         @ExternalDocumentation(

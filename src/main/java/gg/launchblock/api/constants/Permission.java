@@ -61,6 +61,11 @@ public enum Permission {
     // game instances within a container
     VIEW_GAME_INSTANCES("view_game_instances", "View a list of game instances within a container"),
 
+    // matchmaker
+    CREATE_MATCHMAKER_MATCH("create_matchmaker_match", "Create a matchmaker match with a list of players", false),
+    VIEW_MATCHMAKER_MATCH("view_matchmaker_match", "Create a matchmaker match with a list of players", false),
+    MANAGE_MATCHMAKER_MATCH("manage_matchmaker_match", "Remove players from a matchmaker match", false),
+
     // affect container metadata [container only]
     CREATE_GAME_INSTANCES("create_game_instances", "Create game instances within the calling container", false),
     UPDATE_GAME_INSTANCES("update_game_instances", "Update the state and metadata of games within the calling container", false),

@@ -41,6 +41,8 @@ spec:
               value: "http://api-scaler"
             - name: LOGS_CLIENT_URL
               value: "http://api-logs"
+            - name: MATCHMAKER_CLIENT_URL
+              value: "http://svc-matchman"
             - name: MONGODB_CONNECTION_STRING
               value: "mongodb://mongodb.launchblock-services.svc.cluster.local:27017"
             - name: MONGODB_USERNAME
